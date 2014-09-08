@@ -1,0 +1,22 @@
+body{
+    background-color:whitesmoke;
+    font-family:sans-serif;
+}
+
+.greeting_header{
+    color:green;
+}
+
+#contents{
+    margin_left:50px;
+}
+
+ul{
+	width: 300px;
+	border: 3px darkgray dotted;
+	padding 10px;
+}
+
+img{
+    border: 10px orange solid;
+}
