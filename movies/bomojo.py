@@ -38,6 +38,7 @@ class BOMojoScraper(scraper.Scraper):
 
 
     def parse_full_mojo_page(self,full_page_url):
+        print full_page_url
         soup = self.connect(full_page_url)
         release_date = self.to_date(
             self.get_movie_value(soup,'Release Date'))
@@ -46,6 +47,10 @@ class BOMojoScraper(scraper.Scraper):
         runtime = self.runtime_to_minutes(self.get_movie_value(soup,'Runtime'))
         director = self.get_movie_value(soup,'Director')
         rating = self.get_movie_value(soup,'MPAA Rating')
+        budget = self.budget_to_int(
+            self.get_movie_value(soup,'Production Budget'))
+        opening_weekend_gross = self.money_to_int(
+            self.get_movie_value(soup,'Opening\xa0Weekend'))
 
         movie_dict = {
             'movie title':self.get_movie_title(soup),
@@ -53,10 +58,12 @@ class BOMojoScraper(scraper.Scraper):
             'domestic_total_gross':domestic_total_gross,
             'runtime':runtime,
             'director':director,
-            'rating':rating
+            'rating':rating,
+            'budget':budget,
+            'opening_weekend_gross': opening_weekend_gross
         }
-
-        return movie_dict
+        if self.get_movie_title(soup):
+            return movie_dict
             
 
     def get_movie_value(self,soup,value_name):
@@ -72,7 +79,16 @@ class BOMojoScraper(scraper.Scraper):
     
         #for domestic box office totals
         if value_name == 'Domestic Total':
-            return obj.find_parent('td').find('b').text.split(' ')[0]
+            if obj.find_parent('td').find('a') == None:
+                return obj.find_parent('td').find('b').text.split(' ')[0]
+            else:
+                return obj.find_parent('td').find('a').find('b').text.split(' ')[3]
+                
+        if value_name == 'Opening\xa0Weekend':
+            if soup.find(text=re.compile('Wide\xa0Opening\xa0Weekend')) <> None:
+                obj = soup.find(text=re.compile('Wide\xa0Opening\xa0Weekend')).find_parent().find_parent()
+            else:
+                obj = soup.find(text=re.compile('Opening\xa0Weekend')).find_parent().find_parent()
             
         # this works for most of the values
         next_sibling = obj.findNextSibling()
@@ -98,8 +114,20 @@ class BOMojoScraper(scraper.Scraper):
         return dateutil.parser.parse(datestring)
 
     def money_to_int(self,moneystring):
-        return int(moneystring.replace('$','').replace(',',''))
+        if  moneystring == None or moneystring.lower().strip() == 'n/a':
+            return 'N/A'
+        else:
+            return int(moneystring.replace('$','').replace(',',''))
+    
+    def budget_to_int(self,budgetstring):
+        if budgetstring.lower().strip() == 'n/a':
+            return 'N/A'
+        else:
+            return float(budgetstring.split(' ')[0].replace('$','').replace(',',''))*1000000
 
     def runtime_to_minutes(self,runtimestring):
         rt = runtimestring.split(' ')
-        return int(rt[0])*60 + int(rt[2])
+        if runtimestring.lower().strip() == 'n/a':
+            return 'N/A'
+        else:
+            return int(rt[0])*60 + int(rt[2])
