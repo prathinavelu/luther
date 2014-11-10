@@ -1,8 +1,0 @@
-(dp0
-S'Laurie'
-p1
-I1
-sS'Irmak'
-p2
-I12
-s.

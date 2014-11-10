@@ -1,14 +1,6 @@
 from bs4 import BeautifulSoup
 from urlparse import urlparse
 import urllib2
-#import googlesearch
-
-
-class GoogleSearchLimitError(Exception):
-    pass
-
-class DidNotFindError(Exception):
-    pass
 
 class Scraper(object):
 
@@ -32,13 +24,4 @@ class Scraper(object):
         url = self.construct_search_url(query)
         return self.connect(url)
 
-#     def google_search(self, query):
-#         source = urlparse(self.base_url).netloc
-#         google_query = "%s: %s" % (source, query)
-#         try:
-#             url = googlesearch.GoogleSearch(google_query).top_unescaped_url()
-#         except googlesearch.TooManySearchesError:
-#             raise GoogleSearchLimitError
-#         else:
-#             return self.connect(url)
 
